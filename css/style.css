@@ -891,7 +891,7 @@ input, select, textarea { font-family: var(--font-body); font-size: 0.9375rem; }
    MATERIALS HIGHLIGHT
 ═══════════════════════════════════════════════════ */
 .materials { position: relative; overflow: hidden; }
-.materials-grid { display: grid; grid-template-columns: 1fr 1fr; min-height: 600px; position: relative; }
+.materials-grid { display: grid; grid-template-columns: 1fr; min-height: 600px; position: relative; }
 .material-panel { position: relative; overflow: hidden; min-height: 300px; }
 .material-img {
   position: absolute; inset: 0;
