@@ -187,13 +187,45 @@
       submitBtn.disabled = true;
       submitBtn.style.opacity = '0.75';
 
-      setTimeout(function () {
-        submitBtn.innerHTML = originalHTML;
-        submitBtn.disabled = false;
-        submitBtn.style.opacity = '';
-        showSuccessMessage(contactForm);
-        contactForm.reset();
-      }, 1000);
+      const phoneField = contactForm.querySelector('#phone');
+      const serviceField = contactForm.querySelector('#service');
+      const messageField = contactForm.querySelector('#message');
+
+      const payload = {
+        fullName: fullName.value.trim(),
+        email: email.value.trim(),
+        phone: phoneField ? phoneField.value.trim() : '',
+        service: serviceField ? serviceField.value : '',
+        message: messageField ? messageField.value.trim() : '',
+      };
+
+      fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(function (res) {
+          return res.json().catch(function () { return {}; }).then(function (data) {
+            return { ok: res.ok, data: data };
+          });
+        })
+        .then(function (result) {
+          submitBtn.innerHTML = originalHTML;
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '';
+          if (result.ok) {
+            showSuccessMessage(contactForm);
+            contactForm.reset();
+          } else {
+            showErrorMessage(contactForm, result.data.error || 'Something went wrong. Please try again.');
+          }
+        })
+        .catch(function () {
+          submitBtn.innerHTML = originalHTML;
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '';
+          showErrorMessage(contactForm, 'Something went wrong. Please try again or contact us directly.');
+        });
     });
   }
 
@@ -214,7 +246,7 @@
   }
 
   function showSuccessMessage(form) {
-    const existing = document.querySelector('.form-success-msg');
+    const existing = document.querySelector('.form-success-msg, .form-error-msg');
     if (existing) existing.remove();
 
     const msg = document.createElement('div');
@@ -222,6 +254,26 @@
     msg.setAttribute('role', 'alert');
     msg.innerHTML = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" style="flex-shrink:0"><circle cx="10" cy="10" r="9" stroke="#B8952A" stroke-width="1.5"/><path d="M6 10 L9 13 L14 7" stroke="#B8952A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Thank you! We will contact you shortly.</span>';
     msg.style.cssText = 'display:flex;align-items:center;gap:0.75rem;background:rgba(184,149,42,0.08);border:1px solid rgba(184,149,42,0.3);color:#1A1A1A;padding:1rem 1.25rem;font-size:0.875rem;font-weight:500;margin-top:0.5rem;opacity:0;transition:opacity 0.4s ease;';
+
+    form.parentNode.appendChild(msg);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { msg.style.opacity = '1'; });
+    });
+    setTimeout(function () {
+      msg.style.opacity = '0';
+      setTimeout(function () { msg.remove(); }, 400);
+    }, 6000);
+  }
+
+  function showErrorMessage(form, text) {
+    const existing = document.querySelector('.form-success-msg, .form-error-msg');
+    if (existing) existing.remove();
+
+    const msg = document.createElement('div');
+    msg.className = 'form-error-msg';
+    msg.setAttribute('role', 'alert');
+    msg.innerHTML = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" style="flex-shrink:0"><circle cx="10" cy="10" r="9" stroke="#C0392B" stroke-width="1.5"/><path d="M10 6v5M10 14h.01" stroke="#C0392B" stroke-width="1.5" stroke-linecap="round"/></svg><span>' + text + '</span>';
+    msg.style.cssText = 'display:flex;align-items:center;gap:0.75rem;background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.3);color:#1A1A1A;padding:1rem 1.25rem;font-size:0.875rem;font-weight:500;margin-top:0.5rem;opacity:0;transition:opacity 0.4s ease;';
 
     form.parentNode.appendChild(msg);
     requestAnimationFrame(function () {
