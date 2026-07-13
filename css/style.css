@@ -1301,6 +1301,18 @@ input, select, textarea { font-family: var(--font-body); font-size: 0.9375rem; }
   }
   .nav-container { padding: 0 1.25rem; }
 
+  /* backdrop-filter on an ancestor (even at blur(0px)) makes it a containing
+     block for position:fixed descendants — that breaks .nav-links' viewport-
+     relative positioning and causes stale/partial paint of the mobile menu.
+     Disable it on mobile across every nav-container state. */
+  .nav-container,
+  .nav-header.scrolled .nav-container,
+  .nav-header.nav-static .nav-container,
+  .nav-header.scrolled-deep .nav-container {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
   /* When mobile menu is open, flatten bottom corners of pill so menu attaches cleanly */
   .nav-header.scrolled .nav-container.menu-open,
   .nav-header.nav-static .nav-container.menu-open {
@@ -1311,23 +1323,24 @@ input, select, textarea { font-family: var(--font-body); font-size: 0.9375rem; }
   .nav-links {
     position: fixed;
     top: var(--nav-height); left: var(--container-pad); right: var(--container-pad);
-    background: rgba(255, 255, 255, 0.94);
-    backdrop-filter: blur(24px) saturate(1.6);
-    -webkit-backdrop-filter: blur(24px) saturate(1.6);
+    background: #FFFFFF;
+    backdrop-filter: none; -webkit-backdrop-filter: none;
     border: 1px solid rgba(255, 255, 255, 0.25);
     border-top: none;
     border-radius: 0 0 16px 16px;
     flex-direction: column; align-items: flex-start;
     gap: 0; padding: 0;
-    transform: translateY(-8px); opacity: 0;
+    transform: translateY(-8px) translateZ(0); opacity: 0;
+    -webkit-transform: translateY(-8px) translateZ(0);
     transition: transform var(--transition-mid), opacity var(--transition-mid);
     border-bottom: 2px solid var(--color-gold);
     z-index: 999;
+    will-change: transform;
     max-height: calc(100vh - var(--nav-height)); overflow-y: auto;
     box-shadow: 0 16px 40px rgba(0,0,0,0.12);
   }
-  .nav-links.open { transform: translateY(0); opacity: 1; }
-  .nav-links li { width: 100%; }
+  .nav-links.open { transform: translateY(0) translateZ(0); opacity: 1; }
+  .nav-links li { width: 100%; background: #FFFFFF; }
   .nav-link {
     display: block;
     padding: 1rem var(--container-pad);
@@ -1339,17 +1352,20 @@ input, select, textarea { font-family: var(--font-body); font-size: 0.9375rem; }
   .nav-link::after { display: none; }
 
   /* Mobile dropdown */
-  .has-dropdown .nav-dropdown {
+  .has-dropdown .nav-dropdown,
+  .has-dropdown:hover .nav-dropdown {
     position: static; opacity: 1; visibility: visible; transform: none;
     box-shadow: none; border-top: none; border-radius: 0;
-    background: rgba(245,242,238,0.8);
+    background: #F5F2EE;
+    backdrop-filter: none; -webkit-backdrop-filter: none;
     border-left: 2px solid var(--color-gold);
     border-right: none; border-bottom: none;
     margin-left: var(--container-pad);
+    width: auto;
     display: none;
-    backdrop-filter: none; -webkit-backdrop-filter: none;
   }
-  .has-dropdown.open .nav-dropdown { display: block; }
+  .has-dropdown.open .nav-dropdown,
+  .has-dropdown:hover.open .nav-dropdown { display: block; }
   .dropdown-link { padding: 0.7rem 1.25rem; font-size: 0.8125rem; color: var(--color-text-mid); }
   .nav-arrow { display: inline-block; float: right; }
 
